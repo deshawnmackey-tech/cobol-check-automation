@@ -27,11 +27,9 @@ jobs:
           ./gradlew jar
           cp build/libs/cobol-check-*.jar ../CobolCheck.jar
 
-      - name: Show COBOL Check help
-        run: java -jar CobolCheck.jar --help || java -jar CobolCheck.jar -h || true
-
       - name: Run COBOL Check tests
-        run: java -jar CobolCheck.jar
+        run: |
+          java -jar CobolCheck.jar -p HELLO
 
       - name: Upload test results
         if: always()
