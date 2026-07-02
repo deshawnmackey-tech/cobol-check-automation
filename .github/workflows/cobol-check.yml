@@ -20,15 +20,20 @@ jobs:
           distribution: temurin
           java-version: '11'
 
+      - name: Install GnuCOBOL
+        run: sudo apt-get install -y gnucobol
+
       - name: Build COBOL Check from source
         run: |
           git clone --depth 1 https://github.com/openmainframeproject/cobol-check.git cobol-check-src
           cd cobol-check-src
           ./gradlew jar
           cp build/libs/cobol-check-*.jar ../CobolCheck.jar
+          cp -r scripts ../scripts
 
       - name: Run COBOL Check tests
         run: |
+          chmod +x scripts/linux_gnucobol_run_tests
           java -jar CobolCheck.jar -p HELLO
 
       - name: Upload test results
@@ -36,4 +41,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cobol-check-results
-          path: "*.xml"
+          path: testruns/
