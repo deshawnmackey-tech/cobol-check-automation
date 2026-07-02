@@ -21,10 +21,20 @@ jobs:
           java-version: '11'
 
       - name: Install GnuCOBOL
-        run: sudo apt-get install -y gnucobol
+        run: |
+          if ! command -v cobc &>/dev/null; then
+            brew install gnucobol
+          else
+            echo "GnuCOBOL already installed: $(cobc --version | head -1)"
+          fi
 
       - name: Install Zowe CLI
-        run: npm install -g @zowe/cli@latest --ignore-scripts
+        run: |
+          if ! command -v zowe &>/dev/null; then
+            npm install -g @zowe/cli@latest --ignore-scripts
+          else
+            echo "Zowe CLI already installed: $(zowe --version)"
+          fi
 
       - name: Build COBOL Check from source
         run: |
