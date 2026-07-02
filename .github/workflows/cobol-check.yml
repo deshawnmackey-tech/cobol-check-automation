@@ -23,6 +23,9 @@ jobs:
       - name: Install GnuCOBOL
         run: sudo apt-get install -y gnucobol
 
+      - name: Install Zowe CLI
+        run: npm install -g @zowe/cli@latest --ignore-scripts
+
       - name: Build COBOL Check from source
         run: |
           git clone --depth 1 https://github.com/openmainframeproject/cobol-check.git cobol-check-src
@@ -30,6 +33,14 @@ jobs:
           ./gradlew jar
           cp build/libs/cobol-check-*.jar ../CobolCheck.jar
           cp -r scripts ../scripts
+
+      - name: Setup mainframe environment
+        env:
+          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+        run: |
+          chmod +x .github/scripts/zowe_operations.sh
+          .github/scripts/zowe_operations.sh
 
       - name: Run COBOL Check tests
         run: |
@@ -42,11 +53,3 @@ jobs:
         with:
           name: cobol-check-results
           path: testruns/
-
-      - name: Setup mainframe environment
-        env:
-          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
-          ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
-        run: |
-          chmod +x .github/scripts/zowe_operations.sh
-          .github/scripts/zowe_operations.sh
