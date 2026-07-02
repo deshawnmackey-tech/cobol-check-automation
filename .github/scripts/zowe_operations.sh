@@ -65,6 +65,10 @@ zowe zos-files upload dir-to-uss "./scripts" "$REMOTE_DIR/scripts" --recursive
 echo "Uploading config..."
 zowe zos-files upload file-to-uss "./config.properties" "$REMOTE_DIR/config.properties"
 
+# Upload test suites
+echo "Uploading test suites..."
+zowe zos-files upload dir-to-uss "./tests" "$REMOTE_DIR/tests" --recursive
+
 # Verify upload
 echo "Verifying upload:"
 zowe zos-files list uss-files "$REMOTE_DIR"

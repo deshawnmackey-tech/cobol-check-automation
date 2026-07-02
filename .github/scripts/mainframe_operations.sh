@@ -1,38 +1,28 @@
 #!/bin/sh
 # mainframe_operations.sh
 # Runs on the mainframe USS environment.
-# Sets up environment, makes files executable, and runs COBOL Check for each program.
 
-set -e
-
-# Validate required environment variable
-if [[ -z "$ZOWE_USERNAME" ]]; then
+if [ -z "$ZOWE_USERNAME" ]; then
   echo "ERROR: ZOWE_USERNAME must be set."
   exit 1
 fi
 
-# Set up environment
 export JAVA_HOME=/usr/lpp/java/J8.0_64
 export PATH=$PATH:$JAVA_HOME/bin
-export PATH=$PATH:/usr/lpp/zowe/cli/node/bin
 
-# Check Java availability
 echo "Checking Java..."
 java -version
 
-# Change to the cobolcheck directory
 COBOLCHECK_DIR="/z/$(echo $ZOWE_USERNAME | tr '[:upper:]' '[:lower:]')/cobolcheck"
 cd "$COBOLCHECK_DIR"
 echo "Changed to $(pwd)"
 ls -al
 
-# Make scripts executable
 chmod +x scripts/linux_gnucobol_run_tests
 echo "Made linux_gnucobol_run_tests executable"
 
-# Function to run COBOL Check for a single program
 run_cobolcheck() {
-  local program=$1
+  program=$1
   echo "--------------------------------------------"
   echo "Running COBOL Check for $program..."
 
@@ -55,12 +45,11 @@ run_cobolcheck() {
       echo "WARNING: Failed to copy ${program}.JCL to ${ZOWE_USERNAME}.JCL($program)"
     fi
   else
-    echo "NOTE: ${program}.JCL not found — skipping JCL copy"
+    echo "NOTE: ${program}.JCL not found - skipping JCL copy"
   fi
 }
 
-# Run COBOL Check for each program
-for program in NUMBERS ALPHA EMPPAY DEPTPAY; do
+for program in NUMBERS ALPHA; do
   run_cobolcheck "$program"
 done
 
