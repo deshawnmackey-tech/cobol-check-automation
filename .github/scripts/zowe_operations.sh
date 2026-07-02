@@ -10,14 +10,32 @@ if [[ -z "$ZOWE_USERNAME" || -z "$ZOWE_PASSWORD" || -z "$ZOWE_HOST" || -z "$ZOWE
   exit 1
 fi
 
-# Create Zowe profile so CLI knows where to connect
 echo "Configuring Zowe connection to $ZOWE_HOST:$ZOWE_PORT..."
-zowe config init --no-prompt --no-secure
-zowe config set profiles.base.properties.host "$ZOWE_HOST"
-zowe config set profiles.base.properties.port "$ZOWE_PORT"
-zowe config set profiles.base.properties.user "$ZOWE_USERNAME"
-zowe config set profiles.base.properties.password "$ZOWE_PASSWORD"
-zowe config set profiles.base.properties.rejectUnauthorized "$ZOWE_REJECT_UNAUTHORIZED"
+
+# Write zowe.config.json directly — avoids keychain/libsecret entirely
+cat > zowe.config.json << ZOWE_CONFIG
+{
+  "\$schema": "./node_modules/@zowe/cli/schemas/zowe-v2-config.json",
+  "profiles": {
+    "base": {
+      "type": "base",
+      "properties": {
+        "host": "$ZOWE_HOST",
+        "port": $ZOWE_PORT,
+        "user": "$ZOWE_USERNAME",
+        "password": "$ZOWE_PASSWORD",
+        "rejectUnauthorized": ${ZOWE_REJECT_UNAUTHORIZED:-false}
+      }
+    }
+  },
+  "defaults": {
+    "base": "base"
+  },
+  "autoStore": false
+}
+ZOWE_CONFIG
+
+echo "Zowe config written."
 
 # Convert username to lowercase for USS path
 LOWERCASE_USERNAME=$(echo "$ZOWE_USERNAME" | tr '[:upper:]' '[:lower:]')
