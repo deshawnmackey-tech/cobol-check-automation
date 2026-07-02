@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # mainframe_operations.sh
 # Runs on the mainframe USS environment.
 # Sets up environment, makes files executable, and runs COBOL Check for each program.
