@@ -1,2 +1,4 @@
 # cobol-check-automation
-Automating COBOL testing with CobolCheck and GitHub Actions.
+Automating COBOL testing with cobolcheck and GitHub Actions.
+
+## Structure

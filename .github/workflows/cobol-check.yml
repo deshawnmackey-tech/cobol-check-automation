@@ -1,0 +1,41 @@
+name: COBOL Check Automation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  cobol-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Java 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Download COBOL Check
+        run: |
+          curl -L https://github.com/openmainframeproject/cobol-check/releases/download/v0.2.8/CobolCheck.jar \
+            -o CobolCheck.jar
+
+      - name: Run COBOL Check tests
+        run: |
+          java -jar CobolCheck.jar \
+            --programs HELLO \
+            --source-dir src \
+            --test-suite-dir tests \
+            --config cobolcheck.properties
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cobol-check-results
+          path: "*.xml"
