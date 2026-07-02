@@ -65,7 +65,24 @@ jobs:
           chmod +x .github/scripts/zowe_operations.sh
           .github/scripts/zowe_operations.sh
 
-      - name: Run COBOL Check tests
+      - name: Run COBOL Check on Mainframe
+        env:
+          ZOWE_HOST: ${{ secrets.ZOWE_HOST }}
+          ZOWE_PORT: ${{ secrets.ZOWE_PORT }}
+          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          ZOWE_REJECT_UNAUTHORIZED: ${{ secrets.ZOWE_REJECT_UNAUTHORIZED }}
+        run: |
+          REMOTE_DIR="/z/$(echo $ZOWE_USERNAME | tr '[:upper:]' '[:lower:]')/cobolcheck"
+          zowe zos-files upload file-to-uss \
+            ".github/scripts/mainframe_operations.sh" \
+            "$REMOTE_DIR/mainframe_operations.sh"
+          zowe zos-uss issue command \
+            "chmod +x $REMOTE_DIR/mainframe_operations.sh"
+          zowe zos-uss issue command \
+            "export ZOWE_USERNAME=$ZOWE_USERNAME && cd $REMOTE_DIR && ./mainframe_operations.sh"
+
+      - name: Run COBOL Check tests locally
         run: |
           chmod +x scripts/linux_gnucobol_run_tests
           java -jar CobolCheck.jar -p NUMBERS && java -jar CobolCheck.jar -p ALPHA
