@@ -36,7 +36,17 @@ jobs:
             echo "Zowe CLI already installed: $(zowe --version)"
           fi
 
+      - name: Cache COBOL Check JAR
+        id: cache-cobolcheck
+        uses: actions/cache@v4
+        with:
+          path: |
+            CobolCheck.jar
+            scripts/
+          key: cobolcheck-${{ runner.os }}-v0.2.19
+
       - name: Build COBOL Check from source
+        if: steps.cache-cobolcheck.outputs.cache-hit != 'true'
         run: |
           git clone --depth 1 https://github.com/openmainframeproject/cobol-check.git cobol-check-src
           cd cobol-check-src
