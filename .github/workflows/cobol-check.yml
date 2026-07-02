@@ -98,7 +98,7 @@ jobs:
           for program in NUMBERS ALPHA; do
             echo "--------------------------------------------"
             echo "Submitting compile+run job for $program..."
-            JOBID=$(zowe jobs submit data-set "Z75525.JCL($program)" \
+            JOBID=$(zowe jobs submit data-set "$ZOWE_USERNAME.JCL($program)" \
               --host $ZOWE_HOST --port $ZOWE_PORT \
               --user $ZOWE_USERNAME --password $ZOWE_PASSWORD \
               --reject-unauthorized $ZOWE_REJECT_UNAUTHORIZED \
@@ -106,13 +106,22 @@ jobs:
             echo "Job submitted: $JOBID"
 
             echo "Waiting for $JOBID to complete..."
-            zowe jobs wait-for-job-outputs --jobid "$JOBID" \
-              --host $ZOWE_HOST --port $ZOWE_PORT \
-              --user $ZOWE_USERNAME --password $ZOWE_PASSWORD \
-              --reject-unauthorized $ZOWE_REJECT_UNAUTHORIZED || true
+            STATUS="ACTIVE"
+            ATTEMPTS=0
+            while [ "$STATUS" = "ACTIVE" ] && [ $ATTEMPTS -lt 30 ]; do
+              sleep 5
+              STATUS=$(zowe jobs view job-status-by-jobid "$JOBID" \
+                --host $ZOWE_HOST --port $ZOWE_PORT \
+                --user $ZOWE_USERNAME --password $ZOWE_PASSWORD \
+                --reject-unauthorized $ZOWE_REJECT_UNAUTHORIZED \
+                --rff status --rft string 2>/dev/null || echo "UNKNOWN")
+              ATTEMPTS=$((ATTEMPTS + 1))
+              echo "  Status: $STATUS (attempt $ATTEMPTS)"
+            done
 
-            echo "Job output for $JOBID:"
-            zowe jobs view job-status-by-jobid "$JOBID" \
+            echo "Final status for $JOBID: $STATUS"
+            echo "Job output:"
+            zowe jobs view all-spool-content "$JOBID" \
               --host $ZOWE_HOST --port $ZOWE_PORT \
               --user $ZOWE_USERNAME --password $ZOWE_PASSWORD \
               --reject-unauthorized $ZOWE_REJECT_UNAUTHORIZED || true
