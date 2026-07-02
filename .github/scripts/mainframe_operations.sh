@@ -18,8 +18,10 @@ cd "$COBOLCHECK_DIR"
 echo "Changed to $(pwd)"
 ls -al
 
+# Make all scripts executable
 chmod +x scripts/linux_gnucobol_run_tests
-echo "Made linux_gnucobol_run_tests executable"
+chmod +x scripts/zos_run_tests
+echo "Made scripts executable"
 
 run_cobolcheck() {
   program=$1
