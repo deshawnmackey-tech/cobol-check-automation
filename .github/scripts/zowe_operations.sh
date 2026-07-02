@@ -12,13 +12,12 @@ fi
 
 # Create Zowe profile so CLI knows where to connect
 echo "Configuring Zowe connection to $ZOWE_HOST:$ZOWE_PORT..."
-zowe config init --no-prompt
+zowe config init --no-prompt --no-secure
 zowe config set profiles.base.properties.host "$ZOWE_HOST"
 zowe config set profiles.base.properties.port "$ZOWE_PORT"
 zowe config set profiles.base.properties.user "$ZOWE_USERNAME"
 zowe config set profiles.base.properties.password "$ZOWE_PASSWORD"
 zowe config set profiles.base.properties.rejectUnauthorized "$ZOWE_REJECT_UNAUTHORIZED"
-zowe config set profiles.base.secure '["user","password"]' --json
 
 # Convert username to lowercase for USS path
 LOWERCASE_USERNAME=$(echo "$ZOWE_USERNAME" | tr '[:upper:]' '[:lower:]')
