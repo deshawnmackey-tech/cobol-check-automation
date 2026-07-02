@@ -74,3 +74,14 @@ echo "Verifying upload:"
 zowe zos-files list uss-files "$REMOTE_DIR"
 
 echo "Done."
+
+# Upload JCL members to mainframe dataset
+echo "Uploading JCL members..."
+for jclfile in jcl/*.jcl; do
+  member=$(basename "$jclfile" .jcl)
+  zowe zos-files upload file-to-data-set "$jclfile" "Z75525.JCL($member)" \
+    --host "$ZOWE_HOST" --port "$ZOWE_PORT" \
+    --user "$ZOWE_USERNAME" --password "$ZOWE_PASSWORD" \
+    --reject-unauthorized "$ZOWE_REJECT_UNAUTHORIZED"
+  echo "Uploaded $member to Z75525.JCL($member)"
+done
