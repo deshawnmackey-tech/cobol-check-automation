@@ -87,6 +87,37 @@ jobs:
           zowe zos-uss issue command \
             "export ZOWE_USERNAME=$ZOWE_USERNAME && cd $REMOTE_DIR && ./mainframe_operations.sh"
 
+      - name: Submit and monitor compile+run jobs
+        env:
+          ZOWE_HOST: ${{ secrets.ZOWE_HOST }}
+          ZOWE_PORT: ${{ secrets.ZOWE_PORT }}
+          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          ZOWE_REJECT_UNAUTHORIZED: ${{ secrets.ZOWE_REJECT_UNAUTHORIZED }}
+        run: |
+          for program in NUMBERS ALPHA; do
+            echo "--------------------------------------------"
+            echo "Submitting compile+run job for $program..."
+            JOBID=$(zowe jobs submit data-set "Z75525.JCL($program)" \
+              --host $ZOWE_HOST --port $ZOWE_PORT \
+              --user $ZOWE_USERNAME --password $ZOWE_PASSWORD \
+              --reject-unauthorized $ZOWE_REJECT_UNAUTHORIZED \
+              --rff jobid --rft string)
+            echo "Job submitted: $JOBID"
+
+            echo "Waiting for $JOBID to complete..."
+            zowe jobs wait-for-job-outputs --jobid "$JOBID" \
+              --host $ZOWE_HOST --port $ZOWE_PORT \
+              --user $ZOWE_USERNAME --password $ZOWE_PASSWORD \
+              --reject-unauthorized $ZOWE_REJECT_UNAUTHORIZED || true
+
+            echo "Job output for $JOBID:"
+            zowe jobs view job-status-by-jobid "$JOBID" \
+              --host $ZOWE_HOST --port $ZOWE_PORT \
+              --user $ZOWE_USERNAME --password $ZOWE_PASSWORD \
+              --reject-unauthorized $ZOWE_REJECT_UNAUTHORIZED || true
+          done
+
       - name: Run COBOL Check tests locally
         run: |
           chmod +x scripts/linux_gnucobol_run_tests
