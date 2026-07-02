@@ -40,10 +40,8 @@ jobs:
         id: cache-cobolcheck
         uses: actions/cache@v4
         with:
-          path: |
-            CobolCheck.jar
-            scripts/
-          key: cobolcheck-${{ runner.os }}-v0.2.19-b
+          path: CobolCheck.jar
+          key: cobolcheck-${{ runner.os }}-v0.2.19
 
       - name: Build COBOL Check from source
         if: steps.cache-cobolcheck.outputs.cache-hit != 'true'
@@ -52,7 +50,14 @@ jobs:
           cd cobol-check-src
           ./gradlew jar
           cp build/libs/cobol-check-*.jar ../CobolCheck.jar
-          cp -r scripts ../scripts
+
+      - name: Prepare scripts directory
+        run: |
+          git clone --depth 1 https://github.com/openmainframeproject/cobol-check.git cobol-check-scripts 2>/dev/null || true
+          mkdir -p scripts
+          cp cobol-check-scripts/scripts/* scripts/ 2>/dev/null || true
+          cp scripts/zos_run_tests scripts/ 2>/dev/null || true
+          chmod +x scripts/linux_gnucobol_run_tests scripts/zos_run_tests
 
       - name: Setup mainframe environment
         env:
