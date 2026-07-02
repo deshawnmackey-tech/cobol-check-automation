@@ -1,0 +1,140 @@
+name: COBOL Check Automation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  cobol-check:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Install GnuCOBOL
+        run: |
+          if ! command -v cobc &>/dev/null; then
+            brew install gnucobol
+          else
+            echo "GnuCOBOL already installed: $(cobc --version | head -1)"
+          fi
+
+      - name: Install Zowe CLI
+        run: |
+          if ! command -v zowe &>/dev/null; then
+            npm install -g @zowe/cli@latest --ignore-scripts
+          else
+            echo "Zowe CLI already installed: $(zowe --version)"
+          fi
+
+      - name: Cache COBOL Check JAR
+        id: cache-cobolcheck
+        uses: actions/cache@v4
+        with:
+          path: CobolCheck.jar
+          key: cobolcheck-${{ runner.os }}-v0.2.19
+
+      - name: Build COBOL Check from source
+        if: steps.cache-cobolcheck.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth 1 https://github.com/openmainframeproject/cobol-check.git cobol-check-src
+          cd cobol-check-src
+          ./gradlew jar
+          cp build/libs/cobol-check-*.jar ../CobolCheck.jar
+
+      - name: Prepare scripts directory
+        run: |
+          git clone --depth 1 https://github.com/openmainframeproject/cobol-check.git cobol-check-scripts 2>/dev/null || true
+          mkdir -p scripts
+          cp cobol-check-scripts/scripts/* scripts/ 2>/dev/null || true
+          cp scripts/zos_run_tests scripts/ 2>/dev/null || true
+          chmod +x scripts/linux_gnucobol_run_tests scripts/zos_run_tests
+
+      - name: Setup mainframe environment
+        env:
+          ZOWE_HOST: ${{ secrets.ZOWE_HOST }}
+          ZOWE_PORT: ${{ secrets.ZOWE_PORT }}
+          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          ZOWE_REJECT_UNAUTHORIZED: ${{ secrets.ZOWE_REJECT_UNAUTHORIZED }}
+        run: |
+          chmod +x .github/scripts/zowe_operations.sh
+          .github/scripts/zowe_operations.sh
+
+      - name: Run COBOL Check on Mainframe
+        env:
+          ZOWE_HOST: ${{ secrets.ZOWE_HOST }}
+          ZOWE_PORT: ${{ secrets.ZOWE_PORT }}
+          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          ZOWE_REJECT_UNAUTHORIZED: ${{ secrets.ZOWE_REJECT_UNAUTHORIZED }}
+        run: |
+          REMOTE_DIR="/z/$(echo $ZOWE_USERNAME | tr '[:upper:]' '[:lower:]')/cobolcheck"
+          zowe zos-files upload file-to-uss \
+            ".github/scripts/mainframe_operations.sh" \
+            "$REMOTE_DIR/mainframe_operations.sh"
+          zowe zos-uss issue command \
+            "chmod +x $REMOTE_DIR/mainframe_operations.sh"
+          zowe zos-uss issue command \
+            "export ZOWE_USERNAME=$ZOWE_USERNAME && cd $REMOTE_DIR && ./mainframe_operations.sh"
+
+      - name: Submit and monitor compile+run jobs
+        env:
+          ZOWE_HOST: ${{ secrets.ZOWE_HOST }}
+          ZOWE_PORT: ${{ secrets.ZOWE_PORT }}
+          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          ZOWE_REJECT_UNAUTHORIZED: ${{ secrets.ZOWE_REJECT_UNAUTHORIZED }}
+        run: |
+          for program in NUMBERS ALPHA; do
+            echo "--------------------------------------------"
+            echo "Submitting compile+run job for $program..."
+            JOBID=$(zowe jobs submit data-set "$ZOWE_USERNAME.JCL($program)" \
+              --host $ZOWE_HOST --port $ZOWE_PORT \
+              --user $ZOWE_USERNAME --password $ZOWE_PASSWORD \
+              --reject-unauthorized $ZOWE_REJECT_UNAUTHORIZED \
+              --rff jobid --rft string)
+            echo "Job submitted: $JOBID"
+
+            echo "Waiting for $JOBID to complete..."
+            STATUS="ACTIVE"
+            ATTEMPTS=0
+            while [ "$STATUS" = "ACTIVE" ] && [ $ATTEMPTS -lt 30 ]; do
+              sleep 5
+              STATUS=$(zowe jobs view job-status-by-jobid "$JOBID" \
+                --host $ZOWE_HOST --port $ZOWE_PORT \
+                --user $ZOWE_USERNAME --password $ZOWE_PASSWORD \
+                --reject-unauthorized $ZOWE_REJECT_UNAUTHORIZED \
+                --rff status --rft string 2>/dev/null || echo "UNKNOWN")
+              ATTEMPTS=$((ATTEMPTS + 1))
+              echo "  Status: $STATUS (attempt $ATTEMPTS)"
+            done
+
+            echo "Final status for $JOBID: $STATUS"
+            echo "Job output:"
+            zowe jobs view all-spool-content "$JOBID" \
+              --host $ZOWE_HOST --port $ZOWE_PORT \
+              --user $ZOWE_USERNAME --password $ZOWE_PASSWORD \
+              --reject-unauthorized $ZOWE_REJECT_UNAUTHORIZED || true
+          done
+
+      - name: Run COBOL Check tests locally
+        run: |
+          chmod +x scripts/linux_gnucobol_run_tests
+          java -jar CobolCheck.jar -p NUMBERS && java -jar CobolCheck.jar -p ALPHA
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobol-check-results
+          path: testruns/

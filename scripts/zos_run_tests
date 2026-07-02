@@ -1,0 +1,34 @@
+#!/bin/sh
+# zos_run_tests
+# Compiles and runs COBOL Check generated test program using IBM Enterprise COBOL on z/OS.
+
+TEST_PROGRAM=$1
+
+if [ -z "$TEST_PROGRAM" ]; then
+  echo "ERROR: No test program path provided."
+  exit 1
+fi
+
+echo "Compiling test program: $TEST_PROGRAM"
+
+# Set up Enterprise COBOL environment
+export PATH=/usr/lpp/cobol/bin:$PATH
+export STEPLIB=IGY.V6R5M0.SIGYCOMP
+
+# Compile the generated test program
+cob2 -o "${TEST_PROGRAM%.CBL}" "$TEST_PROGRAM"
+COMPILE_RC=$?
+
+if [ $COMPILE_RC -ne 0 ]; then
+  echo "ERROR: Compilation failed with return code $COMPILE_RC"
+  exit $COMPILE_RC
+fi
+
+echo "Compilation successful. Running tests..."
+
+# Run the compiled test program
+"${TEST_PROGRAM%.CBL}"
+RUN_RC=$?
+
+echo "Test run completed with return code $RUN_RC"
+exit $RUN_RC
