@@ -34,7 +34,7 @@ jobs:
       - name: Run COBOL Check tests
         run: |
           chmod +x scripts/linux_gnucobol_run_tests
-          java -jar CobolCheck.jar -p HELLO
+          java -jar CobolCheck.jar -p HELLO,NUMBERS,ALPHA
 
       - name: Upload test results
         if: always()
