@@ -20,10 +20,12 @@ jobs:
           distribution: temurin
           java-version: '11'
 
-      - name: Download COBOL Check
+      - name: Build COBOL Check from source
         run: |
-          curl -L https://github.com/openmainframeproject/cobol-check/releases/download/v0.2.8/CobolCheck.jar \
-            -o CobolCheck.jar
+          git clone --depth 1 https://github.com/openmainframeproject/cobol-check.git cobol-check-src
+          cd cobol-check-src
+          ./gradlew jar
+          cp build/libs/cobol-check-*.jar ../CobolCheck.jar
 
       - name: Run COBOL Check tests
         run: |
