@@ -43,7 +43,7 @@ jobs:
           path: |
             CobolCheck.jar
             scripts/
-          key: cobolcheck-${{ runner.os }}-v0.2.19
+          key: cobolcheck-${{ runner.os }}-v0.2.19-b
 
       - name: Build COBOL Check from source
         if: steps.cache-cobolcheck.outputs.cache-hit != 'true'
