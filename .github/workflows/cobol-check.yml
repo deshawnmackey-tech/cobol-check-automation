@@ -36,8 +36,11 @@ jobs:
 
       - name: Setup mainframe environment
         env:
+          ZOWE_HOST: ${{ secrets.ZOWE_HOST }}
+          ZOWE_PORT: ${{ secrets.ZOWE_PORT }}
           ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
           ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          ZOWE_REJECT_UNAUTHORIZED: ${{ secrets.ZOWE_REJECT_UNAUTHORIZED }}
         run: |
           chmod +x .github/scripts/zowe_operations.sh
           .github/scripts/zowe_operations.sh

@@ -5,10 +5,20 @@
 set -e  # Exit immediately on any error
 
 # Validate required environment variables
-if [[ -z "$ZOWE_USERNAME" || -z "$ZOWE_PASSWORD" ]]; then
-  echo "ERROR: ZOWE_USERNAME and ZOWE_PASSWORD must be set."
+if [[ -z "$ZOWE_USERNAME" || -z "$ZOWE_PASSWORD" || -z "$ZOWE_HOST" || -z "$ZOWE_PORT" ]]; then
+  echo "ERROR: ZOWE_USERNAME, ZOWE_PASSWORD, ZOWE_HOST, and ZOWE_PORT must be set."
   exit 1
 fi
+
+# Create Zowe profile so CLI knows where to connect
+echo "Configuring Zowe connection to $ZOWE_HOST:$ZOWE_PORT..."
+zowe config init --no-prompt
+zowe config set profiles.base.properties.host "$ZOWE_HOST"
+zowe config set profiles.base.properties.port "$ZOWE_PORT"
+zowe config set profiles.base.properties.user "$ZOWE_USERNAME"
+zowe config set profiles.base.properties.password "$ZOWE_PASSWORD"
+zowe config set profiles.base.properties.rejectUnauthorized "$ZOWE_REJECT_UNAUTHORIZED"
+zowe config set profiles.base.secure '["user","password"]' --json
 
 # Convert username to lowercase for USS path
 LOWERCASE_USERNAME=$(echo "$ZOWE_USERNAME" | tr '[:upper:]' '[:lower:]')
@@ -28,8 +38,7 @@ zowe zos-files upload dir-to-uss "./src" "$REMOTE_DIR/src" --recursive
 
 # Upload COBOL Check JAR (binary)
 echo "Uploading CobolCheck JAR..."
-zowe zos-files upload file-to-uss "./CobolCheck.jar" "$REMOTE_DIR/CobolCheck.jar" \
-  --binary
+zowe zos-files upload file-to-uss "./CobolCheck.jar" "$REMOTE_DIR/CobolCheck.jar" --binary
 
 # Upload run scripts
 echo "Uploading run scripts..."
