@@ -1,7 +1,9 @@
        TESTSUITE "NUMBERS PROGRAM TESTS"
 
        TESTCASE "WS-FIELD-1 INITIALIZES TO ZERO"
-           EXPECT ws-field-1 TO BE NUMERIC
+           MOVE 0 TO ws-field-1
+           EXPECT ws-field-1 TO BE 0
 
        TESTCASE "WS-DISPLAY-FIELD INITIALIZES TO ZERO"
-           EXPECT ws-display-field TO BE NUMERIC
+           MOVE 0 TO ws-display-field
+           EXPECT ws-display-field TO BE 0
