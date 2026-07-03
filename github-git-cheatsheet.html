@@ -1,0 +1,266 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>GitHub Cheatsheet</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2328;
+    background: #ffffff;
+    padding: 32px 16px;
+  }
+  .container { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 28px; }
+  h2 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #57606a;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 6px;
+    margin: 28px 0 12px;
+  }
+  .card {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: #1f2328;
+  }
+  code, pre {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 12.5px;
+    background: #eef0f3;
+    border-radius: 4px;
+  }
+  code { padding: 1px 5px; }
+  pre {
+    padding: 12px 14px;
+    overflow-x: auto;
+    line-height: 1.7;
+    border: 1px solid #e5e7eb;
+  }
+  .comment { color: #57606a; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    padding: 7px 10px;
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    font-weight: 600;
+  }
+  td {
+    padding: 7px 10px;
+    border: 1px solid #e5e7eb;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #fafbfc; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 10px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .badge-blue { background: #dbeafe; color: #1d4ed8; }
+  .badge-green { background: #dcfce7; color: #15803d; }
+  .badge-purple { background: #ede9fe; color: #6d28d9; }
+  .repo-url {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 12.5px;
+    color: #3b82d4;
+    word-break: break-all;
+  }
+  .step-list { list-style: none; counter-reset: steps; }
+  .step-list li {
+    counter-increment: steps;
+    padding: 5px 0 5px 28px;
+    position: relative;
+    font-size: 13px;
+  }
+  .step-list li::before {
+    content: counter(steps);
+    position: absolute;
+    left: 0;
+    top: 5px;
+    background: #3b82d4;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 18px;
+    text-align: center;
+  }
+  footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+    font-size: 11px;
+    color: #57606a;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>GitHub &amp; Git Cheatsheet</h1>
+  <div class="subtitle">cobol-check-automation project — DeShawn Mackey</div>
+
+  
+  <h2>Repository</h2>
+  <div class="card">
+    <table>
+      <tr><th style="width:160px">Field</th><th>Value</th></tr>
+      <tr><td>Remote URL</td><td><span class="repo-url">https://github.com/deshawnmackey-tech/cobol-check-automation.git</span></td></tr>
+      <tr><td>Branch</td><td><code>main</code></td></tr>
+      <tr><td>Runner</td><td><code>self-hosted</code> <span class="badge badge-purple">macOS</span></td></tr>
+      <tr><td>Workflow file</td><td><code>.github/workflows/cobol-check.yml</code></td></tr>
+    </table>
+  </div>
+
+  
+  <h2>Remote Terminal Access</h2>
+  <div class="card">
+    <div class="card-title">First-time setup</div>
+    <pre><span class="comment"># Navigate to project</span>
+cd /Users/deshawnmackey/Documents/cobol-check-0
+
+<span class="comment"># Add remote (if not already set)</span>
+git remote add origin https://github.com/deshawnmackey-tech/cobol-check-automation.git
+
+<span class="comment"># Verify remote</span>
+git remote -v</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Clone on a new machine</div>
+    <pre>git clone https://github.com/deshawnmackey-tech/cobol-check-automation.git
+cd cobol-check-automation</pre>
+  </div>
+
+  
+  <h2>Daily Git Workflow</h2>
+  <div class="card">
+    <pre><span class="comment"># Pull latest changes</span>
+git pull origin main
+
+<span class="comment"># Stage all changes</span>
+git add .
+
+<span class="comment"># Stage specific files</span>
+git add src/main/cobol/EMPPAY.CBL
+
+<span class="comment"># Commit</span>
+git commit -m "your message here"
+
+<span class="comment"># Push to GitHub</span>
+git push origin main</pre>
+  </div>
+
+  
+  <h2>Credentials &amp; Authentication</h2>
+  <div class="card">
+    <div class="card-title">Personal Access Token (PAT) — use instead of password</div>
+    <ol class="step-list">
+      <li>Go to GitHub → <strong>Settings</strong> → <strong>Developer settings</strong> → <strong>Personal access tokens</strong> → <strong>Tokens (classic)</strong></li>
+      <li>Click <strong>Generate new token</strong> → check <strong>repo</strong> scope → copy the token</li>
+      <li>When terminal prompts for password, paste the token</li>
+    </ol>
+  </div>
+  <div class="card">
+    <div class="card-title">Cache credentials so you don't re-enter them</div>
+    <pre><span class="comment"># Cache for 1 hour</span>
+git config --global credential.helper cache
+
+<span class="comment"># Store permanently via macOS Keychain</span>
+git config --global credential.helper osxkeychain</pre>
+  </div>
+
+  
+  <h2>GitHub Actions — Self-Hosted Runner</h2>
+  <div class="card">
+    <div class="card-title">Register your machine as a runner</div>
+    <ol class="step-list">
+      <li>Go to your repo → <strong>Settings</strong> → <strong>Actions</strong> → <strong>Runners</strong> → <strong>New self-hosted runner</strong></li>
+      <li>Select <strong>macOS</strong> and follow the install commands in the UI</li>
+      <li>Run <code>./run.sh</code> on your machine to start listening</li>
+      <li>The workflow triggers automatically on every push to <code>main</code></li>
+    </ol>
+  </div>
+
+  
+  <h2>Workflow Steps (cobol-check.yml)</h2>
+  <div class="card">
+    <table>
+      <tr><th>Step</th><th>What it does</th></tr>
+      <tr><td>Checkout</td><td>Pulls repo code onto runner</td></tr>
+      <tr><td>Java 11</td><td>Sets up Temurin JDK for COBOL Check JAR</td></tr>
+      <tr><td>GnuCOBOL</td><td>Installs <code>cobc</code> via <code>brew</code> if missing</td></tr>
+      <tr><td>Zowe CLI</td><td>Installs <code>@zowe/cli</code> via <code>npm</code> if missing</td></tr>
+      <tr><td>Cache JAR</td><td>Caches <code>CobolCheck.jar</code> v0.2.19</td></tr>
+      <tr><td>Build COBOL Check</td><td>Clones &amp; builds JAR from source on cache miss</td></tr>
+      <tr><td>Mainframe setup</td><td>Runs <code>zowe_operations.sh</code> with secrets</td></tr>
+      <tr><td>Run on Mainframe</td><td>Uploads &amp; executes <code>mainframe_operations.sh</code> on z/OS USS</td></tr>
+      <tr><td>Submit JCL jobs</td><td>Submits NUMBERS &amp; ALPHA JCL, polls status, prints spool</td></tr>
+      <tr><td>Local COBOL Check</td><td>Runs <code>java -jar CobolCheck.jar -p NUMBERS</code> and <code>-p ALPHA</code></td></tr>
+      <tr><td>Upload results</td><td>Saves <code>testruns/</code> as Actions artifact</td></tr>
+    </table>
+  </div>
+
+  
+  <h2>Required GitHub Secrets</h2>
+  <div class="card">
+    <p style="font-size:12px;color:#57606a;margin-bottom:10px">Set these at: repo → <strong>Settings → Secrets and variables → Actions</strong></p>
+    <table>
+      <tr><th>Secret</th><th>Purpose</th></tr>
+      <tr><td><code>ZOWE_HOST</code></td><td>Mainframe hostname</td></tr>
+      <tr><td><code>ZOWE_PORT</code></td><td>Mainframe port (typically <code>443</code>)</td></tr>
+      <tr><td><code>ZOWE_USERNAME</code></td><td>Your mainframe user ID</td></tr>
+      <tr><td><code>ZOWE_PASSWORD</code></td><td>Your mainframe password</td></tr>
+      <tr><td><code>ZOWE_REJECT_UNAUTHORIZED</code></td><td><code>true</code> or <code>false</code> for TLS cert validation</td></tr>
+    </table>
+  </div>
+
+  
+  <h2>Key Project Files</h2>
+  <div class="card">
+    <table>
+      <tr><th>File</th><th>Purpose</th></tr>
+      <tr><td><code>src/main/cobol/EMPPAY.CBL</code></td><td>Employee pay COBOL program</td></tr>
+      <tr><td><code>src/test/cobol/EMPPAY/EMPPAY.CUT</code></td><td>COBOL Check test suite for EMPPAY</td></tr>
+      <tr><td><code>EMPPAY.JCL</code></td><td>JCL to compile &amp; run EMPPAY on mainframe</td></tr>
+      <tr><td><code>src/main/cobol/ALPHA.CBL</code></td><td>Alpha expectations test program</td></tr>
+      <tr><td><code>src/main/cobol/NUMBERS.CBL</code></td><td>Numeric relations test program</td></tr>
+      <tr><td><code>config.properties</code></td><td>COBOL Check configuration</td></tr>
+      <tr><td><code>zapp.yaml</code></td><td>IBM Z Open Editor property groups</td></tr>
+    </table>
+  </div>
+
+  <footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>
